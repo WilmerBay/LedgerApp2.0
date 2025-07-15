@@ -2,102 +2,59 @@ package com.example.bankapp.service;
 
 import com.example.bankapp.model.Account;
 import com.example.bankapp.model.Transaction;
+import com.example.bankapp.model.User;
 import com.example.bankapp.repository.AccountRepository;
 import com.example.bankapp.repository.TransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 @Service
-public class AccountService implements UserDetailsService {
+public class AccountService {
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final UserService userService;
 
-    @Autowired
-    private AccountRepository accountRepository;
 
-    @Autowired
-    private TransactionRepository transactionRepository;
-
-    public Account findAccountByUsername(String username) {
-        return accountRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Account not found"));
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository, UserService userService) {
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
+        this.userService = userService;
     }
 
-    public Account registerAccount(String username, String password) {
-        if (accountRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Username already exists");
-        }
-
-        Account account = new Account();
-        account.setUsername(username);
-        account.setPassword(passwordEncoder.encode(password)); // Encrypt password
-        account.setBalance(BigDecimal.ZERO); // Initial balance set to 0
-        return accountRepository.save(account);
+    public List<Account> getAccountsForUser(User user) {
+        return accountRepository.findByUser(user);
     }
 
+    public Account getUserAccountById(User user, Long accountId) {
+        return accountRepository.findById(accountId)
+                .filter(account -> account.getUser().getId().equals(user.getId()))
+                .orElseThrow(() -> new RuntimeException("Account not found or doesn't belong to user"));
+    }
 
     public void deposit(Account account, BigDecimal amount) {
         account.setBalance(account.getBalance().add(amount));
         accountRepository.save(account);
-
-        Transaction transaction = new Transaction(
-                amount,
-                "Deposit",
-                LocalDateTime.now(),
-                account
-        );
-        transactionRepository.save(transaction);
     }
 
     public void withdraw(Account account, BigDecimal amount) {
-        if (account.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds");
+        if (account.getBalance().compareTo(amount) < 0 ) {
+            throw new IllegalArgumentException("Insufficient funds");
         }
         account.setBalance(account.getBalance().subtract(amount));
         accountRepository.save(account);
-
-        Transaction transaction = new Transaction(
-                amount,
-                "Withdrawal",
-                LocalDateTime.now(),
-                account
-        );
-        transactionRepository.save(transaction);
     }
 
-    public List<Transaction> getTransactionHistory(Account account) {
-        return transactionRepository.findByAccountId(account.getId());
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        Account account = findAccountByUsername(username);
-        if (account == null) {
-            throw new UsernameNotFoundException("Username or Password not found");
+    public Account findAccountByUsername(String username) {
+        User user = userService.findByUsername(username);
+        List<Account> accounts = accountRepository.findByUser(user);
+        if (accounts.isEmpty()) {
+            throw new RuntimeException("No accounts found for user: " + username);
         }
-        return new Account(
-                account.getUsername(),
-                account.getPassword(),
-                account.getBalance(),
-                account.getTransactions(),
-                authorities());
-    }
-
-    public Collection<? extends GrantedAuthority> authorities() {
-        return Arrays.asList(new SimpleGrantedAuthority("USER"));
+        // Choose default account (could also let user pick later)
+        return accounts.get(0);
     }
 
     public void transferAmount(Account fromAccount, String toUsername, BigDecimal amount) {
@@ -105,33 +62,49 @@ public class AccountService implements UserDetailsService {
             throw new RuntimeException("Insufficient funds");
         }
 
-        Account toAccount = accountRepository.findByUsername(toUsername)
-                .orElseThrow(() -> new RuntimeException("Recipient account not found"));
+        User recipient = userService.findByUsername(toUsername);
+        List<Account> recipientAccounts = accountRepository.findByUser(recipient);
 
-        // Deduct from sender's account
+        if (recipientAccounts.isEmpty()) {
+            throw new RuntimeException("Recipient has no accounts");
+        }
+
+        Account toAccount = recipientAccounts.get(0); // or allow user to select
+
+        // Update balances
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
-        accountRepository.save(fromAccount);
-
-        // Add to recipient's account
         toAccount.setBalance(toAccount.getBalance().add(amount));
+
+        accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
 
-        // Create transaction records for both accounts
-        Transaction debitTransaction = new Transaction(
-                amount,
-                "Transfer Out to " + toAccount.getUsername(),
-                LocalDateTime.now(),
-                fromAccount
-        );
-        transactionRepository.save(debitTransaction);
+        // Save transaction logs using @Builder
+        Transaction outTx = Transaction.builder()
+                .type("Transfer Out")
+                .amount(amount)
+                .account(fromAccount)
+                .build();
 
-        Transaction creditTransaction = new Transaction(
-                amount,
-                "Transfer In from " + fromAccount.getUsername(),
-                LocalDateTime.now(),
-                toAccount
-        );
-        transactionRepository.save(creditTransaction);
+        Transaction inTx = Transaction.builder()
+                .type("Transfer In")
+                .amount(amount)
+                .account(toAccount)
+                .build();
+
+        transactionRepository.save(outTx);
+        transactionRepository.save(inTx);
     }
 
+
+    public List<Transaction> getTransactionHistory(Account account) {
+        return transactionRepository.findByAccountOrderByTimestampDesc(account);
+    }
+
+    public void save(Account account) {
+        accountRepository.save(account);
+    }
+
+    public List<Account> findAll() {
+        return accountRepository.findAll();
+    }
 }

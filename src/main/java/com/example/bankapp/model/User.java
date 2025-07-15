@@ -6,25 +6,25 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Transaction {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private BigDecimal amount;
-    private String type;
-    private LocalDateTime timestamp;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    private String username;
+    private String password;
+    private String email;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Account> accounts;
 
 }
