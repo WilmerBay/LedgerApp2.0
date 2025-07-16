@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,15 +53,16 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     public String transfer(@RequestParam Long fromAccountId,
-                           @RequestParam String toUsername,
+                           @RequestParam Long toAccountId,
                            @RequestParam BigDecimal amount,
+                           Principal principal,
                            Model model) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findByUsername(username);
+        User user = userService.findByUsername(principal.getName());
         Account fromAccount = accountService.getUserAccountById(user, fromAccountId);
+        Account toAccount = accountService.getAccountById(toAccountId); // no user check here
 
         try {
-            accountService.transferAmount(fromAccount, toUsername, amount);
+            accountService.transferAmount(fromAccount, toAccount, amount);
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("user", user);
@@ -69,6 +71,7 @@ public class TransactionController {
 
         return "redirect:/dashboard";
     }
+
 
     @GetMapping("/transactions")
     public String transactionHistory(Model model) {

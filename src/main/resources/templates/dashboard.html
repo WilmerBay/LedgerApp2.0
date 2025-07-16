@@ -150,13 +150,25 @@
             <div class="collapse mt-3" id="depositForm">
                 <form method="post" action="/deposit" class="form-container">
                     <div class="form-group">
+                        <label for="accountId">Select Account:</label>
+                        <select class="form-control" name="accountId" id="accountId" required>
+                            <option th:each="acc : ${user.accounts}"
+                                    th:value="${acc.id}"
+                                    th:text="${acc.accountType + ' - $' + acc.balance}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label>Amount:</label>
                         <input type="number" class="form-control" name="amount" required />
                     </div>
+
                     <button type="submit" class="btn btn-block btn-success">Submit</button>
                 </form>
             </div>
         </div>
+
 
         <!-- Withdraw Section -->
         <div class="col-md-3">
@@ -166,13 +178,25 @@
             <div class="collapse mt-3" id="withdrawForm">
                 <form method="post" action="/withdraw" class="form-container">
                     <div class="form-group">
+                        <label for="withdrawAccountId">Select Account:</label>
+                        <select class="form-control" name="accountId" id="withdrawAccountId" required>
+                            <option th:each="acc : ${user.accounts}"
+                                    th:value="${acc.id}"
+                                    th:text="${acc.accountType + ' - $' + acc.balance}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label>Amount:</label>
                         <input type="number" class="form-control" name="amount" required />
                     </div>
+
                     <button type="submit" class="btn btn-block btn-success">Submit</button>
                 </form>
             </div>
         </div>
+
 
         <!-- Transfer Section -->
         <div class="col-md-3">
@@ -181,14 +205,37 @@
             </button>
             <div class="collapse mt-3" id="transferForm">
                 <form method="post" action="/transfer" class="form-container">
+
+                    <!-- Source Account Dropdown -->
                     <div class="form-group">
-                        <label>Recipient Username:</label>
-                        <input type="text" class="form-control" name="toUsername" required />
+                        <label for="fromAccountId">From Account:</label>
+                        <select class="form-control" name="fromAccountId" id="fromAccountId" required>
+                            <option th:each="acc : ${user.accounts}"
+                                    th:value="${acc.id}"
+                                    th:text="${acc.accountType + ' - $' + acc.balance}">
+                            </option>
+                        </select>
                     </div>
+
+                    <!-- Recipient Account Dropdown -->
+                    <div class="form-group">
+                        <label for="toAccountId">To Account:</label>
+                        <select class="form-control" name="toAccountId" id="toAccountId" required>
+                            <optgroup th:each="u : ${otherUsers}" th:label="${u.username}">
+                                <option th:each="acc : ${u.accounts}"
+                                        th:value="${acc.id}"
+                                        th:text="${acc.accountType + ' - $' + acc.balance}">
+                                </option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Amount -->
                     <div class="form-group">
                         <label>Amount:</label>
                         <input type="number" class="form-control" name="amount" required />
                     </div>
+
                     <button type="submit" class="btn btn-block btn-success">Submit</button>
                 </form>
             </div>

@@ -57,43 +57,35 @@ public class AccountService {
         return accounts.get(0);
     }
 
-    public void transferAmount(Account fromAccount, String toUsername, BigDecimal amount) {
+    public Account getAccountById(Long id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+    }
+
+    public void transferAmount(Account fromAccount, Account toAccount, BigDecimal amount) {
         if (fromAccount.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds");
         }
 
-        User recipient = userService.findByUsername(toUsername);
-        List<Account> recipientAccounts = accountRepository.findByUser(recipient);
-
-        if (recipientAccounts.isEmpty()) {
-            throw new RuntimeException("Recipient has no accounts");
-        }
-
-        Account toAccount = recipientAccounts.get(0); // or allow user to select
-
-        // Update balances
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
 
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
 
-        // Save transaction logs using @Builder
-        Transaction outTx = Transaction.builder()
+        transactionRepository.save(Transaction.builder()
                 .type("Transfer Out")
                 .amount(amount)
                 .account(fromAccount)
-                .build();
+                .build());
 
-        Transaction inTx = Transaction.builder()
+        transactionRepository.save(Transaction.builder()
                 .type("Transfer In")
                 .amount(amount)
                 .account(toAccount)
-                .build();
-
-        transactionRepository.save(outTx);
-        transactionRepository.save(inTx);
+                .build());
     }
+
 
 
     public List<Transaction> getTransactionHistory(Account account) {
