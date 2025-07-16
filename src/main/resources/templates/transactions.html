@@ -116,7 +116,7 @@
                     th:classappend="${transaction.type == 'Deposit' || transaction.type == 'Transfer In'} ? 'text-success' : 'text-danger'">
                     <span th:text="${transaction.type == 'Deposit' || transaction.type == 'Transfer In'} ? '+$' + transaction.amount : '-$' + transaction.amount"></span>
                 </td>
-                <td th:text="${transaction.timestamp}"></td>
+                <td th:text="${#temporals.format(transaction.timestamp, 'MMM dd, yyyy - HH:mm')}"></td>
             </tr>
             </tbody>
         </table>

@@ -2,6 +2,7 @@ package com.example.bankapp.controller;
 
 import com.example.bankapp.enums.AccountType;
 import com.example.bankapp.model.Account;
+import com.example.bankapp.model.Transaction;
 import com.example.bankapp.model.User;
 import com.example.bankapp.service.AccountService;
 import com.example.bankapp.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -106,8 +108,15 @@ public class TransactionController {
     @GetMapping("/transactions")
     public String transactionHistory(Model model) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Account account = accountService.findAccountByUsername(username);
-        model.addAttribute("transactions", accountService.getTransactionHistory(account));
+        User user = userService.findByUsername(username);
+
+        List<Transaction> allTransactions = user.getAccounts().stream()
+                .flatMap(acc -> accountService.getTransactionHistory(acc).stream())
+                .sorted(Comparator.comparing(Transaction::getTimestamp).reversed())
+                .toList();
+
+        model.addAttribute("transactions", allTransactions);
         return "transactions";
     }
+
 }
