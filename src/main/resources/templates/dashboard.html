@@ -219,14 +219,12 @@
 
                     <!-- Recipient Account Dropdown -->
                     <div class="form-group">
-                        <label for="toAccountId">To Account:</label>
-                        <select class="form-control" name="toAccountId" id="toAccountId" required>
-                            <optgroup th:each="u : ${otherUsers}" th:label="${u.username}">
-                                <option th:each="acc : ${u.accounts}"
-                                        th:value="${acc.id}"
-                                        th:text="${acc.accountType + ' - $' + acc.balance}">
-                                </option>
-                            </optgroup>
+                        <label for="toUsername">To Recipient:</label>
+                        <select class="form-control" name="toUsername" id="toUsername" required>
+                            <option th:each="u : ${otherUsers}"
+                                    th:value="${u.username}"
+                                    th:text="${u.username}">
+                            </option>
                         </select>
                     </div>
 

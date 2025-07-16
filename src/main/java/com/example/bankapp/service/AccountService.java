@@ -8,6 +8,7 @@ import com.example.bankapp.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -76,12 +77,14 @@ public class AccountService {
         transactionRepository.save(Transaction.builder()
                 .type("Transfer Out")
                 .amount(amount)
+                .timestamp(LocalDateTime.now())
                 .account(fromAccount)
                 .build());
 
         transactionRepository.save(Transaction.builder()
                 .type("Transfer In")
                 .amount(amount)
+                .timestamp(LocalDateTime.now())
                 .account(toAccount)
                 .build());
     }
@@ -89,7 +92,7 @@ public class AccountService {
 
 
     public List<Transaction> getTransactionHistory(Account account) {
-        return transactionRepository.findByAccountOrderByTimestampDesc(account);
+        return transactionRepository.findByAccountOrderByTimestamp(account);
     }
 
     public void save(Account account) {

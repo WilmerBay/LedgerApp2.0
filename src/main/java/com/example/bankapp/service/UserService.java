@@ -3,7 +3,6 @@ package com.example.bankapp.service;
 import com.example.bankapp.model.User;
 import com.example.bankapp.repository.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
