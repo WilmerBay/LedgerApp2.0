@@ -154,7 +154,8 @@
                         <select class="form-control" name="accountId" id="accountId" required>
                             <option th:each="acc : ${user.accounts}"
                                     th:value="${acc.id}"
-                                    th:text="${acc.accountType + ' - $' + acc.balance}">
+                                    th:text="${acc.accountType + ' - $' + acc.balance}"
+                                    th:selected="${acc.accountType == T(com.example.bankapp.enums.AccountType).CHECKING}">
                             </option>
                         </select>
                     </div>
@@ -182,7 +183,8 @@
                         <select class="form-control" name="accountId" id="withdrawAccountId" required>
                             <option th:each="acc : ${user.accounts}"
                                     th:value="${acc.id}"
-                                    th:text="${acc.accountType + ' - $' + acc.balance}">
+                                    th:text="${acc.accountType + ' - $' + acc.balance}"
+                                    th:selected="${acc.accountType == T(com.example.bankapp.enums.AccountType).CHECKING}">
                             </option>
                         </select>
                     </div>
@@ -212,7 +214,8 @@
                         <select class="form-control" name="fromAccountId" id="fromAccountId" required>
                             <option th:each="acc : ${user.accounts}"
                                     th:value="${acc.id}"
-                                    th:text="${acc.accountType + ' - $' + acc.balance}">
+                                    th:text="${acc.accountType + ' - $' + acc.balance}"
+                                    th:selected="${acc.accountType == T(com.example.bankapp.enums.AccountType).CHECKING}">
                             </option>
                         </select>
                     </div>
