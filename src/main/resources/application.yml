@@ -3,9 +3,9 @@ spring:
     name: bankapp
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/ledger
+    url: jdbc:postgresql://ledger.c302gk4uasl6.us-west-1.rds.amazonaws.com:5432/postgres
     username: postgres
-    password: postgres1
+    password: RDSLedgerDataBase24$
     driver-class-name: org.postgresql.Driver
 
   jpa:
