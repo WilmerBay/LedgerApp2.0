@@ -26,7 +26,7 @@ jobs:
         with:
           host: 13.56.59.234
           username: ubuntu
-          key:  ~/sarafKEY.pem
+          key: ${{ secrets.EC2_SSH_KEY }}
           source: target/bankapp-0.0.1-SNAPSHOT.jar
           target: /home/ubuntu/bankapp.jar
 
