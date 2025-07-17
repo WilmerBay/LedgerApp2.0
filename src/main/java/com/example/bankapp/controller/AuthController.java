@@ -1,6 +1,8 @@
 package com.example.bankapp.controller;
 
 import com.example.bankapp.service.UserService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
