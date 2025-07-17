@@ -18,20 +18,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build with Maven
+      - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Copy jar to EC2
+      - name: Copy JAR to EC2
         uses: appleboy/scp-action@v0.1.3
         with:
-          host: 13.56.59.234
+          host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: target/bankapp-0.0.1-SNAPSHOT.jar
           target: /home/ubuntu/bankapp.jar
 
-
-      - name: SSH into EC2 and build Docker container
+      - name: SSH into EC2 and run Docker container
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -40,6 +39,7 @@ jobs:
           script: |
             cd /home/ubuntu
             echo -e "FROM openjdk:17-jdk-slim\nCOPY bankapp.jar app.jar\nENTRYPOINT [\"java\",\"-jar\",\"app.jar\"]" > Dockerfile
-            docker stop bankapp || true && docker rm bankapp || true
+            docker stop bankapp || true
+            docker rm bankapp || true
             docker build -t bankapp .
             docker run -d -p 8080:8080 --name bankapp bankapp
