@@ -78,6 +78,7 @@ public class AccountService {
                 .type("Transfer Out")
                 .amount(amount)
                 .timestamp(LocalDateTime.now())
+                .counterparty(toAccount.getUser().getUsername())
                 .account(fromAccount)
                 .build());
 
@@ -85,6 +86,7 @@ public class AccountService {
                 .type("Transfer In")
                 .amount(amount)
                 .timestamp(LocalDateTime.now())
+                .counterparty(fromAccount.getUser().getUsername())
                 .account(toAccount)
                 .build());
     }

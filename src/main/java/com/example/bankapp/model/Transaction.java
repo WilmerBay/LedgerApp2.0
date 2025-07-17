@@ -23,6 +23,9 @@ public class Transaction {
     private String type;
     private LocalDateTime timestamp;
 
+    @Column(name = "counterparty")
+    private String counterparty;
+
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;

@@ -106,6 +106,7 @@
                 <th>Type</th>
                 <th>Amount</th>
                 <th>Date</th>
+                <th>Sender/Receiver</th>
             </tr>
             </thead>
             <tbody>
@@ -117,6 +118,7 @@
                     <span th:text="${transaction.type == 'Deposit' || transaction.type == 'Transfer In'} ? '+$' + transaction.amount : '-$' + transaction.amount"></span>
                 </td>
                 <td th:text="${#temporals.format(transaction.timestamp, 'MMM dd, yyyy - HH:mm')}"></td>
+                <td th:text="${transaction.counterparty} ?: 'N/A'"></td>
             </tr>
             </tbody>
         </table>
