@@ -16,13 +16,11 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-    private final UserService userService;
 
 
-    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository, UserService userService) {
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
-        this.userService = userService;
     }
 
     public List<Account> getAccountsForUser(User user) {
@@ -46,16 +44,6 @@ public class AccountService {
         }
         account.setBalance(account.getBalance().subtract(amount));
         accountRepository.save(account);
-    }
-
-    public Account findAccountByUsername(String username) {
-        User user = userService.findByUsername(username);
-        List<Account> accounts = accountRepository.findByUser(user);
-        if (accounts.isEmpty()) {
-            throw new RuntimeException("No accounts found for user: " + username);
-        }
-        // Choose default account (could also let user pick later)
-        return accounts.get(0);
     }
 
     public Account getAccountById(Long id) {

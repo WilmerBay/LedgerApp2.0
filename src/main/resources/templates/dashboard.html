@@ -1,253 +1,203 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard - Goldencat Bank</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #000000, #ffd700);
-            color: #ffffff;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            background-color: #1e1e2f;
+            color: #f1f1f1;
+            font-family: 'Segoe UI', sans-serif;
         }
 
-        .navbar-custom {
-            background-color: rgba(0, 0, 0, 0.7);
+        .sidebar {
+            width: 220px;
             position: fixed;
             top: 0;
-            width: 100%;
-            z-index: 1000;
+            left: 0;
+            height: 100%;
+            background-color: #2a2a40;
+            padding-top: 60px;
         }
 
-        .navbar-custom a {
-            color: #ffffff !important;
+        .sidebar a {
+            display: block;
+            color: #f1f1f1;
+            padding: 15px 25px;
+            text-decoration: none;
         }
 
-        .navbar-custom .navbar-brand {
-            font-weight: bold;
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #3a3a5a;
+            border-left: 4px solid #00d09c;
         }
 
-        .dashboard-container {
-            max-width: 1000px;
-            margin-top: 50px;
-            text-align: center;
+        .content {
+            margin-left: 220px;
+            padding: 40px;
         }
 
-        h2, h3 {
-            margin-bottom: 20px;
-        }
-
-        .btn-primary {
-            background-color: #000000;
+        .card-custom {
+            background-color: #2a2a40;
             border: none;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #ffd700;
-            color: #000;
-        }
-
-        .btn-success {
-            background-color: #28a745;
-            border: none;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
+            border-radius: 12px;
+            color: #fff;
         }
 
         .form-container {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .account-details {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: #2a2a40;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
             margin-bottom: 20px;
         }
 
-        .error {
-            color: #ff4c4c;
+        .btn-custom {
+            background-color: #00d09c;
+            border: none;
         }
 
-        .footer {
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px 0;
-            font-size: 14px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        .btn-custom:hover {
+            background-color: #00b78b;
         }
 
-        .footer a {
-            color: #ffd700;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .footer a:hover {
-            color: #ffecb3;
-            text-decoration: underline;
-        }
-
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
+        .chart-container {
+            background-color: #2a2a40;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-custom">
-    <a class="navbar-brand" href="#">Goldencat Bank</a>
-    <ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="/transactions">Transactions</a></li>
-        <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
-    </ul>
-</nav>
 
-<div class="container dashboard-container">
-    <div class="text-center">
-        <h2 th:text="'Welcome, ' + ${user.username}"></h2>
-        <div th:each="acc : ${user.accounts}">
-            <h3 th:text="'Account Type: ' + ${acc.accountType}"></h3>
-            <p th:text="'Account ID: ' + ${acc.id}"></p>
-            <p th:text="'Balance: $' + ${acc.balance}"></p>
-        </div>
-    </div>
-
-    <!-- Account Details Section -->
-    <div class="account-details">
-        <h4>Account Details</h4>
-        <p><strong>Account Number:</strong> <span th:text="${account.id}"></span></p> <!-- Use account.id for account number -->
-        <p><strong>Account Type:</strong> <span th:text="${account.getAccountType()}"></span></p>
-    </div>
-
-    <div class="row justify-content-center">
-        <!-- Deposit Section -->
-        <div class="col-md-3">
-            <button class="btn btn-block btn-primary" type="button" data-toggle="collapse" data-target="#depositForm" aria-expanded="false" aria-controls="depositForm">
-                Deposit
-            </button>
-            <div class="collapse mt-3" id="depositForm">
-                <form method="post" action="/deposit" class="form-container">
-                    <div class="form-group">
-                        <label for="accountId">Select Account:</label>
-                        <select class="form-control" name="accountId" id="accountId" required>
-                            <option th:each="acc : ${user.accounts}"
-                                    th:value="${acc.id}"
-                                    th:text="${acc.accountType + ' - $' + acc.balance}"
-                                    th:selected="${acc.accountType == T(com.example.bankapp.enums.AccountType).CHECKING}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Amount:</label>
-                        <input type="number" class="form-control" name="amount" required />
-                    </div>
-
-                    <button type="submit" class="btn btn-block btn-success">Submit</button>
-                </form>
-            </div>
-        </div>
-
-
-        <!-- Withdraw Section -->
-        <div class="col-md-3">
-            <button class="btn btn-block btn-primary" type="button" data-toggle="collapse" data-target="#withdrawForm" aria-expanded="false" aria-controls="withdrawForm">
-                Withdraw
-            </button>
-            <div class="collapse mt-3" id="withdrawForm">
-                <form method="post" action="/withdraw" class="form-container">
-                    <div class="form-group">
-                        <label for="withdrawAccountId">Select Account:</label>
-                        <select class="form-control" name="accountId" id="withdrawAccountId" required>
-                            <option th:each="acc : ${user.accounts}"
-                                    th:value="${acc.id}"
-                                    th:text="${acc.accountType + ' - $' + acc.balance}"
-                                    th:selected="${acc.accountType == T(com.example.bankapp.enums.AccountType).CHECKING}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Amount:</label>
-                        <input type="number" class="form-control" name="amount" required />
-                    </div>
-
-                    <button type="submit" class="btn btn-block btn-success">Submit</button>
-                </form>
-            </div>
-        </div>
-
-
-        <!-- Transfer Section -->
-        <div class="col-md-3">
-            <button class="btn btn-block btn-primary" type="button" data-toggle="collapse" data-target="#transferForm" aria-expanded="false" aria-controls="transferForm">
-                Transfer Money
-            </button>
-            <div class="collapse mt-3" id="transferForm">
-                <form method="post" action="/transfer" class="form-container">
-
-                    <!-- Source Account Dropdown -->
-                    <div class="form-group">
-                        <label for="fromAccountId">From Account:</label>
-                        <select class="form-control" name="fromAccountId" id="fromAccountId" required>
-                            <option th:each="acc : ${user.accounts}"
-                                    th:value="${acc.id}"
-                                    th:text="${acc.accountType + ' - $' + acc.balance}"
-                                    th:selected="${acc.accountType == T(com.example.bankapp.enums.AccountType).CHECKING}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Recipient Account Dropdown -->
-                    <div class="form-group">
-                        <label for="toUsername">To Recipient:</label>
-                        <select class="form-control" name="toUsername" id="toUsername" required>
-                            <option th:each="u : ${otherUsers}"
-                                    th:value="${u.username}"
-                                    th:text="${u.username}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Amount -->
-                    <div class="form-group">
-                        <label>Amount:</label>
-                        <input type="number" class="form-control" name="amount" required />
-                    </div>
-
-                    <button type="submit" class="btn btn-block btn-success">Submit</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <p th:if="${error != null}" th:text="${error}" class="error text-center mt-3"></p>
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="/dashboard" class="active">Dashboard</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/logout">Logout</a>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Main Content -->
+<div class="content">
+    <h2 class="mb-4" th:text="'Welcome, ' + ${user.username}"></h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card card-custom p-3">
+                <h5>Checking Account</h5>
+                <p th:text="'$' + ${user.accounts[0].balance}"></p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card card-custom p-3">
+                <h5>Savings Account</h5>
+                <p th:text="'$' + ${user.accounts[1].balance}"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Form -->
+    <div class="form-container">
+        <h5>Deposit</h5>
+        <form method="post" action="/deposit">
+            <div class="mb-3">
+                <label>Select Account</label>
+                <select class="form-select" name="accountId" required>
+                    <option th:each="acc : ${user.accounts}" th:value="${acc.id}" th:text="${acc.accountType}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>Amount</label>
+                <input type="number" name="amount" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-custom">Deposit</button>
+        </form>
+    </div>
+
+    <!-- Withdraw Form -->
+    <div class="form-container">
+        <h5>Withdraw</h5>
+        <form method="post" action="/withdraw">
+            <div class="mb-3">
+                <label>Select Account</label>
+                <select class="form-select" name="accountId" required>
+                    <option th:each="acc : ${user.accounts}" th:value="${acc.id}" th:text="${acc.accountType}"></option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>Amount</label>
+                <input type="number" name="amount" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-custom">Withdraw</button>
+        </form>
+    </div>
+
+    <!-- Transfer Form -->
+    <div class="form-container">
+        <h5>Transfer</h5>
+        <form method="post" action="/transfer">
+            <div class="mb-3">
+                <label>From Account</label>
+                <select class="form-select" name="fromAccountId" required>
+                    <option th:each="acc : ${user.accounts}" th:value="${acc.id}" th:text="${acc.accountType}"></option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="toUsername">To Recipient:</label>
+                <select class="form-select" name="toUsername" id="toUsername" required>
+                    <option value="" disabled selected>Select a recipient</option>
+                    <option th:each="u : ${otherUsers}"
+                            th:value="${u.username}"
+                            th:text="${u.username}">
+                    </option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>Amount</label>
+                <input type="number" name="amount" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-custom">Transfer</button>
+        </form>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-container">
+        <canvas id="accountChart" height="100"></canvas>
+    </div>
+
+    <canvas id="transactionChart" width="400" height="200"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        let ctx = document.getElementById('transactionChart').getContext('2d');
+        let transactionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [[${chartLabels}]], // Dates
+                datasets: [{
+                    label: 'Transaction Amounts',
+                    data: [[${chartValues}]], // Amounts
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    borderColor: '#4CAF50',
+                    backgroundColor: '#4CAF50'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+
+</div>
 </body>
 </html>

@@ -19,9 +19,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    AccountService accountService;
-
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -58,7 +55,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
-
 }
