@@ -42,6 +42,10 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
+                .rememberMe(remember -> remember
+                        .key("uniqueAndSecret") // Required for token hashing
+                        .tokenValiditySeconds(1209600) // Optional: 14 days
+                )
                 .logout(logout -> logout
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
@@ -55,4 +59,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
