@@ -87,13 +87,13 @@
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card card-custom p-3">
                 <h5>Checking Account</h5>
-                <p th:text="'$' + ${user.accounts[0].balance}"></p>
+                <p th:text="'$' + ${checking.balance}"></p>
             </div>
         </div>
         <div class="col-md-6 col-lg-4 mb-3">
             <div class="card card-custom p-3">
                 <h5>Savings Account</h5>
-                <p th:text="'$' + ${user.accounts[1].balance}"></p>
+                <p th:text="'$' + ${savings.balance}"></p>
             </div>
         </div>
     </div>

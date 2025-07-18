@@ -32,14 +32,16 @@ public class DashboardController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findByUsername(username);
 
+        Account checking = user.getAccounts().stream()
+                .filter(a -> a.getAccountType() == AccountType.CHECKING)
+                .findFirst().orElse(null);
+
+        Account savings = user.getAccounts().stream()
+                .filter(a -> a.getAccountType() == AccountType.SAVINGS)
+                .findFirst().orElse(null);
+
         // Fetch user accounts
         List<Account> accounts = accountService.getAccountsForUser(user);
-
-        // Determine the user's checking account to show by default
-        Account defaultAccount = accounts.stream()
-                .filter(acc -> acc.getAccountType() == AccountType.CHECKING)
-                .findFirst()
-                .orElse(accounts.get(0)); // fallback to first account
 
         // Fetch transactions across all accounts
         List<Transaction> transactions = transactionRepository.findByAccountIn(accounts);
@@ -59,7 +61,8 @@ public class DashboardController {
 
         // Set model attributes
         model.addAttribute("user", user);
-        model.addAttribute("account", defaultAccount);
+        model.addAttribute("checking", checking);
+        model.addAttribute("savings", savings);
         model.addAttribute("accounts", accounts);
         model.addAttribute("otherUsers", otherUsers);
         model.addAttribute("chartLabels", labels);
