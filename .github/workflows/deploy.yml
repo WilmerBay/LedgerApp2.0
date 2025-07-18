@@ -38,7 +38,7 @@ jobs:
           overwrite: true
           rm: false
 
-      - name: SSH into EC2 and run Docker container
+      - name: SSH into EC2 and build Docker container
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -46,8 +46,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu
+            mv bankapp-0.0.1-SNAPSHOT.jar bankapp.jar
             echo -e "FROM openjdk:17-jdk-slim\nCOPY bankapp.jar app.jar\nENTRYPOINT [\"java\",\"-jar\",\"app.jar\"]" > Dockerfile
-            docker stop bankapp || true
-            docker rm bankapp || true
+            docker stop bankapp || true && docker rm bankapp || true
             docker build -t bankapp .
             docker run -d -p 8080:8080 --name bankapp bankapp
