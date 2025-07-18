@@ -33,7 +33,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: target/bankapp-0.0.1-SNAPSHOT.jar
-          target: /home/ubuntu/bankapp.jar
+          target: /home/ubuntu/
           strip_components: 0
           overwrite: true
           rm: false
